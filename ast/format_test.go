@@ -44,8 +44,8 @@ func (ts *testAstFormatSuite) TestAstFormat(c *C) {
 		{`date '1700-01-01'`, ast.DateLiteral + `("1700-01-01")`},
 
 		// Expressions.
-		{`f between 30 and 50`, "`f` BETWEEN 30 AND 50"},
-		{`f not between 30 and 50`, "`f` NOT BETWEEN 30 AND 50"},
+		{`f between 30 and 50`, "(30 <= `f` AND `f` <= 50)"},
+		{`f not between 30 and 50`, "not (30 <= `f` AND `f` <= 50)"},
 		{`345 + "  hello  "`, `345 + "  hello  "`},
 		{`"hello world"    >=    'hello world'`, `"hello world" >= "hello world"`},
 		{`case 3 when 1 then false else true end`, `CASE 3 WHEN 1 THEN FALSE ELSE TRUE END`},

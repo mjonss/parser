@@ -1237,7 +1237,6 @@ import (
 	WindowNameOrSpec                       "WINDOW name or spec"
 	WindowSpec                             "WINDOW spec"
 	WindowSpecDetails                      "WINDOW spec details"
-	BetweenOrNotOp                         "Between predicate"
 	IsOrNotOp                              "Is predicate"
 	InOrNotOp                              "In predicate"
 	LikeOrNotOp                            "Like predicate"
@@ -5182,16 +5181,6 @@ CompareOp:
 		$$ = opcode.NullEQ
 	}
 
-BetweenOrNotOp:
-	"BETWEEN"
-	{
-		$$ = true
-	}
-|	NotSym "BETWEEN"
-	{
-		$$ = false
-	}
-
 IsOrNotOp:
 	"IS"
 	{
@@ -5257,14 +5246,23 @@ PredicateExpr:
 		sq.MultiRows = true
 		$$ = &ast.PatternInExpr{Expr: $1, Not: !$2.(bool), Sel: sq}
 	}
-|	BitExpr BetweenOrNotOp BitExpr "AND" PredicateExpr
+|	BitExpr "BETWEEN" BitExpr "AND" PredicateExpr
 	{
-		$$ = &ast.BetweenExpr{
-			Expr:  $1,
-			Left:  $3,
-			Right: $5,
-			Not:   !$2.(bool),
-		}
+		$$ = &ast.ParenthesesExpr{
+			Expr: &ast.BinaryOperationExpr{
+				Op: opcode.LogicAnd,
+				L:  &ast.BinaryOperationExpr{Op: opcode.LE, L: $3, R: $1},
+				R:  &ast.BinaryOperationExpr{Op: opcode.LE, L: $1, R: $5}}}
+	}
+|	BitExpr NotSym "BETWEEN" BitExpr "AND" PredicateExpr
+	{
+		$$ = &ast.UnaryOperationExpr{
+			Op: opcode.Not,
+			V: &ast.ParenthesesExpr{
+				Expr: &ast.BinaryOperationExpr{
+					Op: opcode.LogicAnd,
+					L:  &ast.BinaryOperationExpr{Op: opcode.LE, L: $4, R: $1},
+					R:  &ast.BinaryOperationExpr{Op: opcode.LE, L: $1, R: $6}}}}
 	}
 |	BitExpr LikeOrNotOp SimpleExpr LikeEscapeOpt
 	{

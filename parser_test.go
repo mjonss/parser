@@ -5968,19 +5968,19 @@ func (s *testParserSuite) TestHighNotPrecedenceMode(c *C) {
 	err = sms[0].Restore(NewRestoreCtx(DefaultRestoreFlags, &sb))
 	c.Assert(err, IsNil)
 	restoreSQL := sb.String()
-	c.Assert(restoreSQL, Equals, "SELECT NOT 1 BETWEEN -5 AND 5")
+	c.Assert(restoreSQL, Equals, "SELECT NOT (-5<=1 AND 1<=5)")
 	sb.Reset()
 
 	sms, _, err = p.Parse("SELECT !1 BETWEEN -5 AND 5", "", "")
 	c.Assert(err, IsNil)
 	v, ok = sms[0].(*ast.SelectStmt)
 	c.Assert(ok, IsTrue)
-	_, ok = v.Fields.Fields[0].Expr.(*ast.BetweenExpr)
+	_, ok = v.Fields.Fields[0].Expr.(*ast.ParenthesesExpr)
 	c.Assert(ok, IsTrue)
 	err = sms[0].Restore(NewRestoreCtx(DefaultRestoreFlags, &sb))
 	c.Assert(err, IsNil)
 	restoreSQL = sb.String()
-	c.Assert(restoreSQL, Equals, "SELECT !1 BETWEEN -5 AND 5")
+	c.Assert(restoreSQL, Equals, "SELECT (-5<=!1 AND !1<=5)")
 	sb.Reset()
 
 	p = parser.New()
@@ -5989,12 +5989,12 @@ func (s *testParserSuite) TestHighNotPrecedenceMode(c *C) {
 	c.Assert(err, IsNil)
 	v, ok = sms[0].(*ast.SelectStmt)
 	c.Assert(ok, IsTrue)
-	_, ok = v.Fields.Fields[0].Expr.(*ast.BetweenExpr)
+	_, ok = v.Fields.Fields[0].Expr.(*ast.ParenthesesExpr)
 	c.Assert(ok, IsTrue)
 	err = sms[0].Restore(NewRestoreCtx(DefaultRestoreFlags, &sb))
 	c.Assert(err, IsNil)
 	restoreSQL = sb.String()
-	c.Assert(restoreSQL, Equals, "SELECT !1 BETWEEN -5 AND 5")
+	c.Assert(restoreSQL, Equals, "SELECT (-5<=!1 AND !1<=5)")
 }
 
 // For CTE
