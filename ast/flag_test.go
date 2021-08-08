@@ -36,22 +36,6 @@ func (ts *testFlagSuite) SetUpSuite(c *C) {
 	ts.Parser = parser.New()
 }
 
-func (ts *testFlagSuite) TestHasAggFlag(c *C) {
-	expr := &ast.BetweenExpr{}
-	flagTests := []struct {
-		flag   uint64
-		hasAgg bool
-	}{
-		{ast.FlagHasAggregateFunc, true},
-		{ast.FlagHasAggregateFunc | ast.FlagHasVariable, true},
-		{ast.FlagHasVariable, false},
-	}
-	for _, tt := range flagTests {
-		expr.SetFlag(tt.flag)
-		c.Assert(ast.HasAggFlag(expr), Equals, tt.hasAgg)
-	}
-}
-
 func (ts *testFlagSuite) TestFlag(c *C) {
 	flagTests := []struct {
 		expr string

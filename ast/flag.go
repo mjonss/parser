@@ -44,8 +44,6 @@ func (f *flagSetter) Leave(in Node) (Node, bool) {
 		f.aggregateFunc(x)
 	case *WindowFuncExpr:
 		f.windowFunc(x)
-	case *BetweenExpr:
-		x.SetFlag(x.Expr.GetFlag() | x.Left.GetFlag() | x.Right.GetFlag())
 	case *BinaryOperationExpr:
 		x.SetFlag(x.L.GetFlag() | x.R.GetFlag())
 	case *CaseExpr:

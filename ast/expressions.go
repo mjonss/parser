@@ -27,7 +27,6 @@ import (
 )
 
 var (
-	_ ExprNode = &BetweenExpr{}
 	_ ExprNode = &BinaryOperationExpr{}
 	_ ExprNode = &CaseExpr{}
 	_ ExprNode = &ColumnNameExpr{}
@@ -70,81 +69,6 @@ var NewValueExpr func(value interface{}, charset string, collate string) ValueEx
 
 // NewParamMarkerExpr creates a ParamMarkerExpr.
 var NewParamMarkerExpr func(offset int) ParamMarkerExpr
-
-// BetweenExpr is for "between and" or "not between and" expression.
-type BetweenExpr struct {
-	exprNode
-	// Expr is the expression to be checked.
-	Expr ExprNode
-	// Left is the expression for minimal value in the range.
-	Left ExprNode
-	// Right is the expression for maximum value in the range.
-	Right ExprNode
-	// Not is true, the expression is "not between and".
-	Not bool
-}
-
-// Restore implements Node interface.
-func (n *BetweenExpr) Restore(ctx *format.RestoreCtx) error {
-	if err := n.Expr.Restore(ctx); err != nil {
-		return errors.Annotate(err, "An error occurred while restore BetweenExpr.Expr")
-	}
-	if n.Not {
-		ctx.WriteKeyWord(" NOT BETWEEN ")
-	} else {
-		ctx.WriteKeyWord(" BETWEEN ")
-	}
-	if err := n.Left.Restore(ctx); err != nil {
-		return errors.Annotate(err, "An error occurred while restore BetweenExpr.Left")
-	}
-	ctx.WriteKeyWord(" AND ")
-	if err := n.Right.Restore(ctx); err != nil {
-		return errors.Annotate(err, "An error occurred while restore BetweenExpr.Right ")
-	}
-	return nil
-}
-
-// Format the ExprNode into a Writer.
-func (n *BetweenExpr) Format(w io.Writer) {
-	n.Expr.Format(w)
-	if n.Not {
-		fmt.Fprint(w, " NOT BETWEEN ")
-	} else {
-		fmt.Fprint(w, " BETWEEN ")
-	}
-	n.Left.Format(w)
-	fmt.Fprint(w, " AND ")
-	n.Right.Format(w)
-}
-
-// Accept implements Node interface.
-func (n *BetweenExpr) Accept(v Visitor) (Node, bool) {
-	newNode, skipChildren := v.Enter(n)
-	if skipChildren {
-		return v.Leave(newNode)
-	}
-
-	n = newNode.(*BetweenExpr)
-	node, ok := n.Expr.Accept(v)
-	if !ok {
-		return n, false
-	}
-	n.Expr = node.(ExprNode)
-
-	node, ok = n.Left.Accept(v)
-	if !ok {
-		return n, false
-	}
-	n.Left = node.(ExprNode)
-
-	node, ok = n.Right.Accept(v)
-	if !ok {
-		return n, false
-	}
-	n.Right = node.(ExprNode)
-
-	return v.Leave(n)
-}
 
 // BinaryOperationExpr is for binary operation like `1 + 1`, `1 - 1`, etc.
 type BinaryOperationExpr struct {

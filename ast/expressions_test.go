@@ -71,7 +71,6 @@ func (tc *testExpressionsSuite) TestExpresionsVisitorCover(c *C) {
 			expectedEnterCnt int
 			expectedLeaveCnt int
 		}{
-			{&BetweenExpr{Expr: ce, Left: ce, Right: ce}, 3, 3},
 			{&BinaryOperationExpr{L: ce, R: ce}, 2, 2},
 			{&CaseExpr{Value: ce, WhenClauses: []*WhenClause{{Expr: ce, Result: ce},
 				{Expr: ce, Result: ce}}, ElseClause: ce}, 6, 6},
