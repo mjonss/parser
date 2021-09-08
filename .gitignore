@@ -4,3 +4,5 @@ y.go
 .idea/
 .vscode/
 coverage.txt
+parser.go
+hintparser.go
